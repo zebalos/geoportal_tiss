@@ -1,12 +1,34 @@
+/* ==========================================================
+   GEOPORTAL RESTAURAÇÃO
+   TI SETE DE SETEMBRO
+========================================================== */
+
 const CFG = {
 
-ink:'#243342',
+    metareila : '#ff0051',
+    ecopore   : '#008bfb',
 
-metareila:'#ff0051',
+    classesUso : {
 
-ecopore:'#008bfb'
+        'Bananal'               : '#00c853',
+        'Cacau'                 : '#6d4c41',
+        'Cafezal'               : '#8d6e63',
+        'Capoeira'              : '#7cb342',
+        'Castanhais'            : '#33691e',
+        'Consórcio de lavouras' : '#ff9800',
+        'Outras culturas'       : '#ffb300',
+        'Pastagem'              : '#f3c300',
+        'Roça tradicional'      : '#ef6c00'
+
+    }
 
 };
+
+/* ==========================================================
+   VARIÁVEIS GLOBAIS
+========================================================== */
+
+let map;
 
 let limiteLayer;
 let usoLayer;
@@ -14,386 +36,572 @@ let restauracaoLayer;
 
 let usoData;
 let restauracaoData;
+let limiteData;
 
-//================================================
+/* ==========================================================
+   MAPA
+========================================================== */
 
-const map = L.map('map',{
+function criarMapa(){
 
-zoomControl:true
+    map = L.map('map', {
 
-}).setView([-11,-61.5],8);
+        zoomControl:true
 
-//================================================
+    });
 
-const satelite = L.tileLayer(
+    map.setView([-11.0,-61.4],8);
 
-'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+    L.tileLayer(
 
-{
-subdomains:'0123',
-maxZoom:20
+        'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+
+        {
+
+            subdomains:['0','1','2','3'],
+            maxZoom:20
+
+        }
+
+    ).addTo(map);
+
 }
 
-).addTo(map);
-
-//================================================
+/* ==========================================================
+   FETCH
+========================================================== */
 
 async function fetchGeoJSON(url){
 
-const r = await fetch(url);
+    const r = await fetch(url);
 
-if(!r.ok){
+    if(!r.ok){
 
-throw new Error(url);
+        throw new Error(
+            `Erro carregando ${url}`
+        );
+
+    }
+
+    return await r.json();
 
 }
 
-return await r.json();
+/* ==========================================================
+   CORES DE USO
+========================================================== */
+
+function getCorUso(tipo){
+
+    return CFG.classesUso[tipo]
+        || '#9e9e9e';
 
 }
 
-//================================================
+/* ==========================================================
+   ESTILOS
+========================================================== */
 
 function estiloUso(feature){
 
-const tipo =
-String(
-feature.properties.Tipo_de_us || ''
-).toLowerCase();
+    const cor =
+        getCorUso(
+            feature.properties.Tipo_de_us
+        );
 
-let cor = '#cccccc';
+    return {
 
-if(tipo.includes('past'))
-cor='#f3c300';
+        color:cor,
 
-if(tipo.includes('banana'))
-cor='#00c853';
+        weight:1,
 
-if(tipo.includes('capoeira'))
-cor='#7cb342';
+        fillColor:cor,
 
-if(tipo.includes('agua'))
-cor='#2196f3';
+        fillOpacity:0.45
 
-return{
-
-color:cor,
-weight:1,
-
-fillColor:cor,
-fillOpacity:.40
-
-};
+    };
 
 }
-
-//================================================
 
 function estiloRestauracao(feature){
 
-const id =
-Number(feature.properties.ID);
+    const id =
+        Number(feature.properties.ID);
 
-let cor = CFG.metareila;
+    let cor =
+        CFG.metareila;
 
-if(id===2)
-cor = CFG.ecopore;
+    if(id === 2){
 
-return{
+        cor =
+            CFG.ecopore;
 
-color:cor,
+    }
 
-weight:2,
+    return {
 
-fillColor:cor,
+        color:cor,
 
-fillOpacity:.80
+        weight:2,
 
-};
+        fillColor:cor,
 
-}
+        fillOpacity:0.35
 
-//================================================
-
-function popupRestauracao(feature,layer){
-
-const p = feature.properties;
-
-layer.bindPopup(`
-
-<b>${p.Nome_Ocupacao}</b>
-
-<hr>
-
-Área: ${Number(p.HA).toFixed(2)} ha
-
-<br>
-
-Uso atual:
-${p.Uso_atual}
-
-<br>
-
-Tipo:
-${p.Tipo_de_us}
-
-`);
+    };
 
 }
 
-//================================================
+function estiloLimite(){
+
+    return {
+
+        color:'#ffffff',
+
+        weight:3,
+
+        fillOpacity:0
+
+    };
+
+}
+
+/* ==========================================================
+   POPUPS
+========================================================== */
+
+function popupRestauracao(feature, layer){
+
+    const p =
+        feature.properties;
+
+    layer.bindPopup(`
+
+        <div class="popup-content">
+
+            <h3>
+                ${p.Nome_Ocupacao || 'Sem nome'}
+            </h3>
+
+            <hr>
+
+            <b>Área:</b>
+            ${Number(p.HA || 0).toFixed(2)} ha
+
+            <br>
+
+            <b>Uso atual:</b>
+            ${p.Uso_atual || '-'}
+
+            <br>
+
+            <b>Tipo:</b>
+            ${p.Tipo_de_us || '-'}
+
+            <br>
+
+            <b>Fator de degradação:</b>
+            ${p.Fator_degrad || '-'}
+
+        </div>
+
+    `);
+
+    layer.bindTooltip(
+
+        p.Nome_Ocupacao || '',
+
+        {
+
+            permanent:true,
+
+            direction:'center',
+
+            className:'label-restauracao'
+
+        }
+
+    );
+
+}
+
+/* ==========================================================
+   ESTATÍSTICAS
+========================================================== */
 
 function atualizarEstatisticas(idFiltro){
 
-let feats =
-restauracaoData.features;
+    let feats =
+        restauracaoData.features;
 
-if(idFiltro!==0){
+    if(idFiltro !== 0){
 
-feats = feats.filter(
+        feats =
+            feats.filter(
 
-f => Number(f.properties.ID)
-=== idFiltro
+                f => Number(
+                    f.properties.ID
+                ) === idFiltro
 
-);
+            );
+
+    }
+
+    const n =
+        feats.length;
+
+    const areaTotal =
+        feats.reduce(
+
+            (acc,f) =>
+
+                acc +
+                Number(
+                    f.properties.HA || 0
+                ),
+
+            0
+
+        );
+
+    const areaMedia =
+        n > 0
+            ? areaTotal / n
+            : 0;
+
+    document.getElementById(
+        'n-poligonos'
+    ).innerHTML = n;
+
+    document.getElementById(
+        'area-total'
+    ).innerHTML =
+        areaTotal.toFixed(2) +
+        ' ha';
+
+    document.getElementById(
+        'area-media'
+    ).innerHTML =
+        areaMedia.toFixed(2) +
+        ' ha';
 
 }
 
-const n =
-feats.length;
+/* ==========================================================
+   LEGENDA
+========================================================== */
 
-const total =
-feats.reduce(
+function gerarLegendaHTML(){
 
-(a,b)=>a+Number(b.properties.HA),
+    let html = '';
 
-0
+    html += `
 
-);
+        <div class="legend-item">
 
-const media =
-n ? total/n : 0;
+            <span
+                class="legend-color"
+                style="background:${CFG.metareila}">
+            </span>
 
-document.getElementById(
-'n-poligonos'
-).innerHTML=n;
+            Metareila
 
-document.getElementById(
-'area-total'
-).innerHTML=
-total.toFixed(2)+' ha';
+        </div>
 
-document.getElementById(
-'area-media'
-).innerHTML=
-media.toFixed(2)+' ha';
+    `;
+
+    html += `
+
+        <div class="legend-item">
+
+            <span
+                class="legend-color"
+                style="background:${CFG.ecopore}">
+            </span>
+
+            Ecoporé
+
+        </div>
+
+    `;
+
+    html += '<hr>';
+
+    Object.entries(
+        CFG.classesUso
+    ).forEach(([classe,cor])=>{
+
+        html += `
+
+            <div class="legend-item">
+
+                <span
+                    class="legend-color"
+                    style="background:${cor}">
+                </span>
+
+                ${classe}
+
+            </div>
+
+        `;
+
+    });
+
+    document.getElementById(
+        'legend-container'
+    ).innerHTML = html;
 
 }
 
-//================================================
+/* ==========================================================
+   RESTAURAÇÃO
+========================================================== */
 
 function renderRestauracao(idFiltro){
 
-if(restauracaoLayer){
+    if(restauracaoLayer){
 
-map.removeLayer(
-restauracaoLayer
-);
+        map.removeLayer(
+            restauracaoLayer
+        );
+
+    }
+
+    restauracaoLayer =
+        L.geoJSON(
+
+            restauracaoData,
+
+            {
+
+                style:
+                    estiloRestauracao,
+
+                filter:f => {
+
+                    if(idFiltro===0){
+
+                        return true;
+
+                    }
+
+                    return Number(
+                        f.properties.ID
+                    ) === idFiltro;
+
+                },
+
+                onEachFeature:
+                    popupRestauracao
+
+            }
+
+        );
+
+    restauracaoLayer.addTo(map);
+
+    if(
+        restauracaoLayer
+        .getLayers()
+        .length
+    ){
+
+        map.fitBounds(
+
+            restauracaoLayer
+            .getBounds(),
+
+            {
+
+                padding:[40,40]
+
+            }
+
+        );
+
+    }
+
+    atualizarEstatisticas(
+        idFiltro
+    );
 
 }
 
-restauracaoLayer =
-L.geoJSON(
+/* ==========================================================
+   CAMADAS
+========================================================== */
 
-restauracaoData,
+function configurarCamadas(){
 
-{
+    document
+    .querySelectorAll(
+        'input[data-layer]'
+    )
+    .forEach(cb=>{
 
-style:estiloRestauracao,
+        cb.addEventListener(
+            'change',
+            e=>{
 
-filter:f=>{
+                const nome =
+                    e.target.dataset.layer;
 
-if(idFiltro===0)
-return true;
+                const ativo =
+                    e.target.checked;
 
-return Number(
-f.properties.ID
-)===idFiltro;
+                let camada;
 
-},
+                if(nome==='uso'){
 
-onEachFeature:
-popupRestauracao
+                    camada = usoLayer;
+
+                }
+                else if(
+                    nome==='restauracao'
+                ){
+
+                    camada =
+                        restauracaoLayer;
+
+                }
+                else{
+
+                    camada =
+                        limiteLayer;
+
+                }
+
+                if(ativo){
+
+                    camada.addTo(map);
+
+                }else{
+
+                    map.removeLayer(
+                        camada
+                    );
+
+                }
+
+            }
+        );
+
+    });
 
 }
 
-).addTo(map);
+/* ==========================================================
+   FILTRO
+========================================================== */
 
-if(
-restauracaoLayer.getLayers()
-.length
-){
+function configurarFiltro(){
 
-map.fitBounds(
+    document
+    .getElementById(
+        'area-select'
+    )
+    .addEventListener(
 
-restauracaoLayer.getBounds(),
+        'change',
 
-{
-padding:[30,30]
+        e=>{
+
+            const id =
+                Number(
+                    e.target.value
+                );
+
+            renderRestauracao(id);
+
+        }
+
+    );
+
 }
 
-);
-
-}
-
-atualizarEstatisticas(
-idFiltro
-);
-
-}
-
-//================================================
+/* ==========================================================
+   INIT
+========================================================== */
 
 async function init(){
 
-try{
+    try{
 
-const [
+        criarMapa();
 
-limite,
-uso,
-rest
+        const dados =
+            await Promise.all([
 
-] = await Promise.all([
+                fetchGeoJSON(
+                    'data/limite_ti.geojson'
+                ),
 
-fetchGeoJSON(
-'data/limite_ti.geojson'
-),
+                fetchGeoJSON(
+                    'data/uso_ocupacao.geojson'
+                ),
 
-fetchGeoJSON(
-'data/uso_ocupacao.geojson'
-),
+                fetchGeoJSON(
+                    'data/areas_restauracao.geojson'
+                )
 
-fetchGeoJSON(
-'data/areas_restauracao.geojson'
-)
+            ]);
 
-]);
+        limiteData =
+            dados[0];
 
-usoData = uso;
+        usoData =
+            dados[1];
 
-restauracaoData = rest;
+        restauracaoData =
+            dados[2];
 
-//--------------------------------
+        limiteLayer =
+            L.geoJSON(
 
-limiteLayer =
-L.geoJSON(
+                limiteData,
 
-limite,
+                {
 
-{
+                    style:
+                        estiloLimite
 
-style:{
+                }
 
-color:'#ffffff',
+            ).addTo(map);
 
-weight:2,
+        usoLayer =
+            L.geoJSON(
 
-fillOpacity:0
+                usoData,
 
-}
+                {
 
-}
+                    style:
+                        estiloUso
 
-).addTo(map);
+                }
 
-//--------------------------------
+            ).addTo(map);
 
-usoLayer =
-L.geoJSON(
+        renderRestauracao(0);
 
-usoData,
+        configurarFiltro();
 
-{
+        configurarCamadas();
 
-style:estiloUso
+        gerarLegendaHTML();
 
-}
+    }
+    catch(err){
 
-).addTo(map);
+        console.error(err);
 
-//--------------------------------
+        alert(
+            'Erro ao carregar os dados do Geoportal.'
+        );
 
-renderRestauracao(0);
-
-//--------------------------------
-
-document
-.getElementById(
-'area-select'
-)
-.addEventListener(
-'change',
-e=>{
-
-renderRestauracao(
-Number(
-e.target.value
-)
-);
-
-}
-);
-
-//--------------------------------
-
-document
-.querySelectorAll(
-'input[data-layer]'
-)
-.forEach(cb=>{
-
-cb.addEventListener(
-'change',
-e=>{
-
-const nome =
-e.target.dataset.layer;
-
-const ativo =
-e.target.checked;
-
-const camada =
-nome==='uso'
-? usoLayer
-: restauracaoLayer;
-
-if(ativo){
-
-camada.addTo(map);
-
-}else{
-
-map.removeLayer(
-camada
-);
-
-}
-
-});
-
-});
-
-}
-catch(err){
-
-console.error(err);
-
-alert(
-'Erro ao carregar GeoJSON. Veja o Console.'
-);
-
-}
+    }
 
 }
 

@@ -5,18 +5,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Áreas de Restauração · TI Sete de Setembro</title>
+<title>Geoportal • Áreas de Restauração • TI Sete de Setembro</title>
 
+<meta name="description"
+content="Geoportal de áreas prioritárias para restauração ecológica na Terra Indígena Sete de Setembro.">
+
+<!-- Leaflet -->
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Google Fonts -->
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
 
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap"
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
 rel="stylesheet">
 
-<link rel="stylesheet" href="css/style.css">
+<!-- CSS -->
+<link rel="stylesheet"
+href="css/style.css">
 
 </head>
 
@@ -24,96 +35,313 @@ rel="stylesheet">
 
 <div id="app">
 
-<aside id="panel">
+    <!-- ===================================================== -->
+    <!-- PAINEL LATERAL -->
+    <!-- ===================================================== -->
 
-<div class="panel-head">
+    <aside id="panel">
 
-<h1>Áreas de Restauração</h1>
+        <header class="panel-head">
 
-<p>TI Sete de Setembro</p>
+            <div class="brand">
+
+                <span class="brand-mark"></span>
+
+                <div class="brand-text">
+
+                    <h1>
+                        Áreas de Restauração
+                    </h1>
+
+                    <p>
+                        TI Sete de Setembro
+                    </p>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- ===================================== -->
+        <!-- FILTRO -->
+        <!-- ===================================== -->
+
+        <section class="block">
+
+            <label
+                class="field-label"
+                for="area-select">
+
+                Instituição
+
+            </label>
+
+            <div class="select-wrap">
+
+                <select id="area-select">
+
+                    <option value="0">
+                        Todas as áreas
+                    </option>
+
+                    <option value="1">
+                        Metareila
+                    </option>
+
+                    <option value="2">
+                        Ecoporé
+                    </option>
+
+                </select>
+
+                <span
+                    class="select-caret">
+                </span>
+
+            </div>
+
+        </section>
+
+        <!-- ===================================== -->
+        <!-- ESTATÍSTICAS -->
+        <!-- ===================================== -->
+
+        <section class="block">
+
+            <h3 class="block-title">
+                Estatísticas
+            </h3>
+
+            <div id="stats">
+
+                <div class="stat-row">
+
+                    <span class="stat-key">
+                        Polígonos
+                    </span>
+
+                    <span
+                        class="stat-val"
+                        id="n-poligonos">
+
+                        -
+
+                    </span>
+
+                </div>
+
+                <div class="stat-row">
+
+                    <span class="stat-key">
+                        Área total
+                    </span>
+
+                    <span
+                        class="stat-val"
+                        id="area-total">
+
+                        -
+
+                    </span>
+
+                </div>
+
+                <div class="stat-row">
+
+                    <span class="stat-key">
+                        Área média
+                    </span>
+
+                    <span
+                        class="stat-val"
+                        id="area-media">
+
+                        -
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ===================================== -->
+        <!-- CAMADAS -->
+        <!-- ===================================== -->
+
+        <section class="block">
+
+            <h3 class="block-title">
+
+                Camadas
+
+            </h3>
+
+            <ul class="layers">
+
+                <li>
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
+                            data-layer="uso"
+                            checked>
+
+                        <span
+                            class="swatch uso">
+                        </span>
+
+                        <span
+                            class="toggle-label">
+
+                            Uso e ocupação
+
+                        </span>
+
+                    </label>
+
+                </li>
+
+                <li>
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
+                            data-layer="restauracao"
+                            checked>
+
+                        <span
+                            class="swatch restauracao">
+                        </span>
+
+                        <span
+                            class="toggle-label">
+
+                            Áreas de restauração
+
+                        </span>
+
+                    </label>
+
+                </li>
+
+                <li>
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
+                            data-layer="limite"
+                            checked>
+
+                        <span
+                            class="swatch limite">
+                        </span>
+
+                        <span
+                            class="toggle-label">
+
+                            Limite da TI
+
+                        </span>
+
+                    </label>
+
+                </li>
+
+            </ul>
+
+        </section>
+
+        <!-- ===================================== -->
+        <!-- LEGENDA -->
+        <!-- ===================================== -->
+
+        <section class="block">
+
+            <h3 class="block-title">
+
+                Legenda
+
+            </h3>
+
+            <div id="legend-container">
+
+                <!-- preenchido pelo JS -->
+
+            </div>
+
+        </section>
+
+        <!-- ===================================== -->
+        <!-- RODAPÉ -->
+        <!-- ===================================== -->
+
+        <footer class="panel-foot">
+
+            <div class="foot-info">
+
+                <span class="crs">
+
+                    EPSG:4326 · WGS84
+
+                </span>
+
+                <span class="src">
+
+                    Base cartográfica:
+                    Google Satellite
+
+                </span>
+
+            </div>
+
+        </footer>
+
+    </aside>
+
+    <!-- ===================================================== -->
+    <!-- MAPA -->
+    <!-- ===================================================== -->
+
+    <main id="map-wrap">
+
+        <div id="map"></div>
+
+        <button
+            id="panel-toggle"
+            class="panel-toggle"
+            type="button">
+
+            <span></span>
+            <span></span>
+            <span></span>
+
+        </button>
+
+    </main>
 
 </div>
 
-<section class="block">
+<!-- ===================================================== -->
+<!-- BIBLIOTECAS -->
+<!-- ===================================================== -->
 
-<label>Área</label>
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
-<select id="area-select">
+<script
+src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js">
+</script>
 
-<option value="0">
-Todas as áreas
-</option>
-
-<option value="1">
-Metareila
-</option>
-
-<option value="2">
-Ecoporé
-</option>
-
-</select>
-
-</section>
-
-<section class="block">
-
-<div id="stats">
-
-<div class="stat">
-<span>Polígonos</span>
-<b id="n-poligonos">-</b>
-</div>
-
-<div class="stat">
-<span>Área total</span>
-<b id="area-total">-</b>
-</div>
-
-<div class="stat">
-<span>Área média</span>
-<b id="area-media">-</b>
-</div>
-
-</div>
-
-</section>
-
-<section class="block">
-
-<h3>Camadas</h3>
-
-<label>
-<input type="checkbox"
-data-layer="uso"
-checked>
-
-Uso e ocupação
-</label>
-
-<label>
-<input type="checkbox"
-data-layer="restauracao"
-checked>
-
-Restauração
-</label>
-
-</section>
-
-</aside>
-
-<main id="map-wrap">
-
-<div id="map"></div>
-
-</main>
-
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script src="js/app.js"></script>
+<script
+src="js/app.js">
+</script>
 
 </body>
 </html>
