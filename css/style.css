@@ -12,10 +12,6 @@
     --c-metareila:#ff0051;
     --c-ecopore:#008bfb;
 
-    --c-validada:#16a34a;
-    --c-nao-validada:#6b7280;
-    --c-pendente:#f3c300;
-
     --line:rgba(36,51,66,.15);
     --line-2:rgba(36,51,66,.25);
 
@@ -45,9 +41,9 @@ body{
     width:100%;
     height:100%;
 
-    overflow:hidden;
-
     font-family:var(--font-ui);
+
+    overflow:hidden;
 
 }
 
@@ -84,9 +80,9 @@ body{
 
 #map-wrap{
 
-    flex:1;
-
     position:relative;
+
+    flex:1;
 
 }
 
@@ -99,7 +95,7 @@ body{
 }
 
 /* ==========================================================
-   PAINEL
+   CABEÇALHO
 ========================================================== */
 
 .panel-head{
@@ -113,9 +109,7 @@ body{
 .brand{
 
     display:flex;
-
     align-items:center;
-
     gap:12px;
 
 }
@@ -129,17 +123,18 @@ body{
 
     border:3px solid var(--c-ink);
 
+    display:block;
+
 }
 
 .brand-text h1{
 
     margin:0;
 
-    color:var(--c-ink);
-
     font-size:16px;
-
     font-weight:800;
+
+    color:var(--c-ink);
 
 }
 
@@ -147,13 +142,13 @@ body{
 
     margin:4px 0 0 0;
 
-    color:var(--c-ink-soft);
-
     font-size:11px;
+
+    letter-spacing:.12em;
 
     text-transform:uppercase;
 
-    letter-spacing:.12em;
+    color:var(--c-ink-soft);
 
 }
 
@@ -175,11 +170,11 @@ body{
 
     font-size:11px;
 
-    color:var(--c-ink-soft);
-
     text-transform:uppercase;
 
-    letter-spacing:.14em;
+    letter-spacing:.15em;
+
+    color:var(--c-ink-soft);
 
 }
 
@@ -217,15 +212,17 @@ body{
 
     padding:11px 38px 11px 12px;
 
-    border-radius:8px;
-
     border:1px solid var(--line-2);
 
-    background:white;
+    border-radius:8px;
+
+    background:#fff;
+
+    font-size:14px;
 
     appearance:none;
 
-    font-size:14px;
+    cursor:pointer;
 
 }
 
@@ -282,9 +279,9 @@ body{
 
 .stat-key{
 
-    font-size:13px;
-
     color:var(--c-ink-soft);
+
+    font-size:13px;
 
 }
 
@@ -297,80 +294,6 @@ body{
 }
 
 /* ==========================================================
-   BOTÕES
-========================================================== */
-
-.tool-btn{
-
-    width:100%;
-
-    padding:12px;
-
-    margin-bottom:10px;
-
-    border:none;
-
-    border-radius:8px;
-
-    background:var(--c-metareila);
-
-    color:white;
-
-    font-weight:700;
-
-    cursor:pointer;
-
-    transition:.2s;
-
-}
-
-.tool-btn:hover{
-
-    opacity:.9;
-
-}
-
-.tool-btn.secondary{
-
-    background:var(--c-ecopore);
-
-}
-
-.popup-btn{
-
-    width:100%;
-
-    padding:8px;
-
-    margin-top:6px;
-
-    border:none;
-
-    border-radius:6px;
-
-    cursor:pointer;
-
-    font-weight:700;
-
-}
-
-.popup-validar{
-
-    background:var(--c-validada);
-
-    color:white;
-
-}
-
-.popup-rejeitar{
-
-    background:var(--c-nao-validada);
-
-    color:white;
-
-}
-
-/* ==========================================================
    CAMADAS
 ========================================================== */
 
@@ -379,7 +302,6 @@ body{
     list-style:none;
 
     margin:0;
-
     padding:0;
 
 }
@@ -415,6 +337,8 @@ body{
 
     border-radius:3px;
 
+    border:1px solid rgba(0,0,0,.15);
+
 }
 
 .swatch.uso{
@@ -431,9 +355,9 @@ body{
 
 .swatch.limite{
 
-    background:white;
+    background:#ffffff;
 
-    border:2px solid black;
+    border:2px solid #000;
 
 }
 
@@ -467,7 +391,42 @@ body{
 }
 
 /* ==========================================================
-   LABELS
+   RODAPÉ
+========================================================== */
+
+.panel-foot{
+
+    margin-top:auto;
+
+    padding:16px 22px;
+
+    border-top:1px solid var(--line);
+
+}
+
+.foot-info{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+.crs,
+.src{
+
+    font-family:var(--font-mono);
+
+    font-size:10px;
+
+    color:var(--c-ink-soft);
+
+}
+
+/* ==========================================================
+   TOOLTIP DAS ÁREAS
 ========================================================== */
 
 .label-restauracao{
@@ -488,15 +447,21 @@ body{
 
     border-radius:4px;
 
+    white-space:nowrap;
+
 }
 
 /* ==========================================================
-   POPUP
+   POPUPS
 ========================================================== */
 
-.popup-content{
+.leaflet-popup-content{
 
-    min-width:220px;
+    font-family:var(--font-ui);
+
+    font-size:13px;
+
+    line-height:1.5;
 
 }
 
@@ -504,9 +469,9 @@ body{
 
     margin:0 0 8px 0;
 
-    color:var(--c-ink);
-
     font-size:15px;
+
+    color:var(--c-ink);
 
 }
 
@@ -516,187 +481,73 @@ body{
 
     border-top:1px solid #ddd;
 
-}
-
-/* ==========================================================
-   STATUS
-========================================================== */
-
-.status{
-
-    display:inline-block;
-
-    padding:4px 8px;
-
-    border-radius:6px;
-
-    font-size:11px;
-
-    font-weight:700;
-
-    margin-top:8px;
-
-}
-
-.status.validada{
-
-    background:var(--c-validada);
-
-    color:white;
-
-}
-
-.status.nao-validada{
-
-    background:var(--c-nao-validada);
-
-    color:white;
-
-}
-
-.status.pendente{
-
-    background:var(--c-pendente);
-
-    color:black;
+    margin:8px 0;
 
 }
 
 /* ==========================================================
-   MODAL
+   LEGENDA DO LEAFLET
 ========================================================== */
 
-.modal{
+.legend{
 
-    position:fixed;
+    background:#fff;
 
-    inset:0;
-
-    background:rgba(0,0,0,.45);
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    z-index:9999;
-
-}
-
-.hidden{
-
-    display:none;
-
-}
-
-.modal-content{
-
-    width:420px;
-
-    max-width:90vw;
-
-    background:white;
-
-    border-radius:12px;
-
-    padding:24px;
-
-}
-
-.modal-content h2{
-
-    margin-top:0;
-
-}
-
-.modal-content label{
-
-    display:block;
-
-    margin-bottom:15px;
-
-}
-
-.modal-content input,
-.modal-content select{
-
-    width:100%;
-
-    margin-top:5px;
-
-    padding:10px;
-
-}
-
-.modal-actions{
-
-    display:flex;
-
-    gap:10px;
-
-    justify-content:flex-end;
-
-}
-
-.modal-actions button{
-
-    padding:10px 18px;
-
-    border:none;
+    padding:10px 12px;
 
     border-radius:8px;
 
-    cursor:pointer;
-
-}
-
-/* ==========================================================
-   LEAFLET DRAW
-========================================================== */
-
-.leaflet-draw-toolbar a{
-
-    background-color:white;
-
-}
-
-.leaflet-bar{
-
     box-shadow:var(--shadow);
 
-}
+    font-size:12px;
 
-/* ==========================================================
-   RODAPÉ
-========================================================== */
-
-.panel-foot{
-
-    margin-top:auto;
-
-    padding:16px 22px;
-
-    border-top:1px solid var(--line);
+    line-height:20px;
 
 }
 
-.crs,
-.src{
+.legend h4{
 
-    display:block;
+    margin:0 0 8px 0;
 
-    font-size:10px;
+    font-size:13px;
 
-    color:var(--c-ink-soft);
+}
 
-    font-family:var(--font-mono);
+.legend hr{
+
+    border:none;
+
+    border-top:1px solid #ddd;
+
+    margin:8px 0;
+
+}
+
+.leg-box{
+
+    display:inline-block;
+
+    width:14px;
+
+    height:14px;
+
+    margin-right:6px;
+
+    border:1px solid rgba(0,0,0,.2);
+
+    vertical-align:middle;
 
 }
 
 /* ==========================================================
    MOBILE
 ========================================================== */
+
+.panel-toggle{
+
+    display:none;
+
+}
 
 @media(max-width:900px){
 
@@ -708,7 +559,13 @@ body{
         top:0;
         bottom:0;
 
-        z-index:2000;
+        box-shadow:var(--shadow);
+
+    }
+
+    .panel-toggle{
+
+        display:flex;
 
     }
 
