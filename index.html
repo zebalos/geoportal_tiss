@@ -1,33 +1,44 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Geoportal • Áreas de Restauração • TI Sete de Setembro</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>
+Geoportal • Áreas de Restauração • TI Sete de Setembro
+</title>
 
 <meta name="description"
-content="Geoportal de áreas prioritárias para restauração ecológica na Terra Indígena Sete de Setembro.">
+      content="Validação e cadastro de áreas prioritárias para restauração ecológica.">
 
 <!-- Leaflet -->
+
 <link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
-<!-- Google Fonts -->
-<link rel="preconnect"
-href="https://fonts.googleapis.com">
+<!-- Leaflet Draw -->
+
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+
+<!-- Fonts -->
 
 <link rel="preconnect"
-href="https://fonts.gstatic.com"
-crossorigin>
+      href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin>
 
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
-rel="stylesheet">
+      rel="stylesheet">
 
-<!-- CSS -->
 <link rel="stylesheet"
-href="css/style.css">
+      href="css/style.css">
 
 </head>
 
@@ -36,7 +47,7 @@ href="css/style.css">
 <div id="app">
 
     <!-- ===================================================== -->
-    <!-- PAINEL LATERAL -->
+    <!-- PAINEL -->
     <!-- ===================================================== -->
 
     <aside id="panel">
@@ -63,15 +74,14 @@ href="css/style.css">
 
         </header>
 
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
         <!-- FILTRO -->
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
 
         <section class="block">
 
-            <label
-                class="field-label"
-                for="area-select">
+            <label class="field-label"
+                   for="area-select">
 
                 Instituição
 
@@ -95,22 +105,22 @@ href="css/style.css">
 
                 </select>
 
-                <span
-                    class="select-caret">
-                </span>
+                <span class="select-caret"></span>
 
             </div>
 
         </section>
 
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
         <!-- ESTATÍSTICAS -->
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
 
         <section class="block">
 
             <h3 class="block-title">
+
                 Estatísticas
+
             </h3>
 
             <div id="stats">
@@ -121,12 +131,9 @@ href="css/style.css">
                         Polígonos
                     </span>
 
-                    <span
-                        class="stat-val"
-                        id="n-poligonos">
-
+                    <span class="stat-val"
+                          id="n-poligonos">
                         -
-
                     </span>
 
                 </div>
@@ -137,12 +144,22 @@ href="css/style.css">
                         Área total
                     </span>
 
-                    <span
-                        class="stat-val"
-                        id="area-total">
-
+                    <span class="stat-val"
+                          id="area-total">
                         -
+                    </span>
 
+                </div>
+
+                <div class="stat-row">
+
+                    <span class="stat-key">
+                        Área validada
+                    </span>
+
+                    <span class="stat-val"
+                          id="area-validada">
+                        -
                     </span>
 
                 </div>
@@ -153,12 +170,9 @@ href="css/style.css">
                         Área média
                     </span>
 
-                    <span
-                        class="stat-val"
-                        id="area-media">
-
+                    <span class="stat-val"
+                          id="area-media">
                         -
-
                     </span>
 
                 </div>
@@ -167,9 +181,37 @@ href="css/style.css">
 
         </section>
 
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
+        <!-- FERRAMENTAS -->
+        <!-- ===================================================== -->
+
+        <section class="block">
+
+            <h3 class="block-title">
+
+                Ferramentas
+
+            </h3>
+
+            <button id="btn-nova-area"
+                    class="tool-btn">
+
+                Nova Área
+
+            </button>
+
+            <button id="btn-exportar"
+                    class="tool-btn secondary">
+
+                Exportar GeoJSON
+
+            </button>
+
+        </section>
+
+        <!-- ===================================================== -->
         <!-- CAMADAS -->
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
 
         <section class="block">
 
@@ -185,19 +227,15 @@ href="css/style.css">
 
                     <label class="toggle">
 
-                        <input
-                            type="checkbox"
-                            data-layer="uso"
-                            checked>
+                        <input type="checkbox"
+                               data-layer="uso"
+                               checked>
 
-                        <span
-                            class="swatch uso">
-                        </span>
+                        <span class="swatch uso"></span>
 
-                        <span
-                            class="toggle-label">
+                        <span class="toggle-label">
 
-                            Uso e ocupação
+                            Uso e Ocupação
 
                         </span>
 
@@ -209,19 +247,15 @@ href="css/style.css">
 
                     <label class="toggle">
 
-                        <input
-                            type="checkbox"
-                            data-layer="restauracao"
-                            checked>
+                        <input type="checkbox"
+                               data-layer="restauracao"
+                               checked>
 
-                        <span
-                            class="swatch restauracao">
-                        </span>
+                        <span class="swatch restauracao"></span>
 
-                        <span
-                            class="toggle-label">
+                        <span class="toggle-label">
 
-                            Áreas de restauração
+                            Áreas de Restauração
 
                         </span>
 
@@ -233,17 +267,13 @@ href="css/style.css">
 
                     <label class="toggle">
 
-                        <input
-                            type="checkbox"
-                            data-layer="limite"
-                            checked>
+                        <input type="checkbox"
+                               data-layer="limite"
+                               checked>
 
-                        <span
-                            class="swatch limite">
-                        </span>
+                        <span class="swatch limite"></span>
 
-                        <span
-                            class="toggle-label">
+                        <span class="toggle-label">
 
                             Limite da TI
 
@@ -257,9 +287,9 @@ href="css/style.css">
 
         </section>
 
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
         <!-- LEGENDA -->
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
 
         <section class="block">
 
@@ -271,15 +301,13 @@ href="css/style.css">
 
             <div id="legend-container">
 
-                <!-- preenchido pelo JS -->
-
             </div>
 
         </section>
 
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
         <!-- RODAPÉ -->
-        <!-- ===================================== -->
+        <!-- ===================================================== -->
 
         <footer class="panel-foot">
 
@@ -287,14 +315,13 @@ href="css/style.css">
 
                 <span class="crs">
 
-                    EPSG:4326 · WGS84
+                    EPSG:4326 • WGS84
 
                 </span>
 
                 <span class="src">
 
-                    Base cartográfica:
-                    Google Satellite
+                    Base: Google Satellite
 
                 </span>
 
@@ -312,36 +339,94 @@ href="css/style.css">
 
         <div id="map"></div>
 
-        <button
-            id="panel-toggle"
-            class="panel-toggle"
-            type="button">
-
-            <span></span>
-            <span></span>
-            <span></span>
-
-        </button>
-
     </main>
 
 </div>
 
 <!-- ===================================================== -->
-<!-- BIBLIOTECAS -->
+<!-- MODAL NOVA ÁREA -->
 <!-- ===================================================== -->
 
-<script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
+<div id="modal-area"
+     class="modal hidden">
 
-<script
-src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js">
-</script>
+    <div class="modal-content">
 
-<script
-src="js/app.js">
-</script>
+        <h2>
+
+            Nova Área de Restauração
+
+        </h2>
+
+        <label>
+
+            Nome da Área
+
+            <input type="text"
+                   id="novo-nome">
+
+        </label>
+
+        <label>
+
+            Uso Atual
+
+            <input type="text"
+                   id="novo-uso">
+
+        </label>
+
+        <label>
+
+            Tipo de Uso
+
+            <select id="novo-tipo">
+
+                <option>Bananal</option>
+                <option>Cacau</option>
+                <option>Cafezal</option>
+                <option>Capoeira</option>
+                <option>Castanhais</option>
+                <option>Consórcio de lavouras</option>
+                <option>Outras culturas</option>
+                <option>Pastagem</option>
+                <option>Roça tradicional</option>
+
+            </select>
+
+        </label>
+
+        <div class="modal-actions">
+
+            <button id="btn-salvar-area">
+
+                Salvar
+
+            </button>
+
+            <button id="btn-cancelar-area">
+
+                Cancelar
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ===================================================== -->
+<!-- JS -->
+<!-- ===================================================== -->
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+<script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+
+<script src="js/app.js"></script>
 
 </body>
 </html>
