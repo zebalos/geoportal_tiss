@@ -1,230 +1,400 @@
-// =====================================================
-// CONFIGURAÇÃO DO MAPA
-// =====================================================
+const CFG = {
 
-const map = L.map('map', {
-    zoomControl: true
-}).setView([-11.2, -61.3], 8);
+ink:'#243342',
 
-// =====================================================
-// BASEMAP
-// =====================================================
+metareila:'#ff0051',
 
-L.tileLayer(
-    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        attribution:
-            '&copy; OpenStreetMap Contributors'
-    }
+ecopore:'#008bfb'
+
+};
+
+let limiteLayer;
+let usoLayer;
+let restauracaoLayer;
+
+let usoData;
+let restauracaoData;
+
+//================================================
+
+const map = L.map('map',{
+
+zoomControl:true
+
+}).setView([-11,-61.5],8);
+
+//================================================
+
+const satelite = L.tileLayer(
+
+'https://mt{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+
+{
+subdomains:'0123',
+maxZoom:20
+}
+
 ).addTo(map);
 
-// =====================================================
-// VARIÁVEIS GLOBAIS
-// =====================================================
+//================================================
 
-let camadaTI = null;
-let camadaUso = null;
-let camadaRestauracao = null;
+async function fetchGeoJSON(url){
 
-let geoRestauracao = null;
+const r = await fetch(url);
 
-// =====================================================
-// STATUS
-// =====================================================
+if(!r.ok){
 
-function atualizarStatus(texto) {
-    document.getElementById("status").innerHTML = texto;
+throw new Error(url);
+
 }
 
-// =====================================================
-// FETCH COM TRATAMENTO
-// =====================================================
+return await r.json();
 
-async function carregarGeoJSON(url) {
-
-    const resposta = await fetch(url);
-
-    if (!resposta.ok) {
-        throw new Error(
-            `Erro ${resposta.status} ao carregar ${url}`
-        );
-    }
-
-    return await resposta.json();
 }
 
-// =====================================================
-// ESTILOS
-// =====================================================
+//================================================
 
-function estiloTI() {
-    return {
-        color: "#000000",
-        weight: 3,
-        fillOpacity: 0
-    };
+function estiloUso(feature){
+
+const tipo =
+String(
+feature.properties.Tipo_de_us || ''
+).toLowerCase();
+
+let cor = '#cccccc';
+
+if(tipo.includes('past'))
+cor='#f3c300';
+
+if(tipo.includes('banana'))
+cor='#00c853';
+
+if(tipo.includes('capoeira'))
+cor='#7cb342';
+
+if(tipo.includes('agua'))
+cor='#2196f3';
+
+return{
+
+color:cor,
+weight:1,
+
+fillColor:cor,
+fillOpacity:.40
+
+};
+
 }
 
-function estiloUso() {
-    return {
-        color: "#f57c00",
-        weight: 1,
-        fillColor: "#ffb74d",
-        fillOpacity: 0.35
-    };
+//================================================
+
+function estiloRestauracao(feature){
+
+const id =
+Number(feature.properties.ID);
+
+let cor = CFG.metareila;
+
+if(id===2)
+cor = CFG.ecopore;
+
+return{
+
+color:cor,
+
+weight:2,
+
+fillColor:cor,
+
+fillOpacity:.80
+
+};
+
 }
 
-function estiloRestauracao() {
-    return {
-        color: "#1b5e20",
-        weight: 2,
-        fillColor: "#4caf50",
-        fillOpacity: 0.8
-    };
+//================================================
+
+function popupRestauracao(feature,layer){
+
+const p = feature.properties;
+
+layer.bindPopup(`
+
+<b>${p.Nome_Ocupacao}</b>
+
+<hr>
+
+Área: ${Number(p.HA).toFixed(2)} ha
+
+<br>
+
+Uso atual:
+${p.Uso_atual}
+
+<br>
+
+Tipo:
+${p.Tipo_de_us}
+
+`);
+
 }
 
-// =====================================================
-// POPUP RESTAURAÇÃO
-// =====================================================
+//================================================
 
-function popupRestauracao(feature, layer) {
+function atualizarEstatisticas(idFiltro){
 
-    const p = feature.properties;
+let feats =
+restauracaoData.features;
 
-    const html = `
-        <div>
-            <div class="popup-title">
-                ${p.Nome_Ocupacao ?? 'Sem nome'}
-            </div>
+if(idFiltro!==0){
 
-            <hr>
+feats = feats.filter(
 
-            <b>ID:</b> ${p.ID}<br>
-            <b>Uso:</b> ${p.Uso_atual ?? '-'}<br>
-            <b>Tipo:</b> ${p.Tipo_de_us ?? '-'}<br>
-            <b>Área:</b> ${Number(p.HA).toFixed(2)} ha<br>
-            <b>Degradação:</b> ${p.Fator_degrad ?? '-'}
-        </div>
-    `;
+f => Number(f.properties.ID)
+=== idFiltro
 
-    layer.bindPopup(html);
+);
+
 }
 
-// =====================================================
-// FILTRO
-// =====================================================
+const n =
+feats.length;
 
-function renderizarRestauracao(idFiltro) {
+const total =
+feats.reduce(
 
-    if (!geoRestauracao) return;
+(a,b)=>a+Number(b.properties.HA),
 
-    if (camadaRestauracao) {
-        map.removeLayer(camadaRestauracao);
-    }
+0
 
-    camadaRestauracao = L.geoJSON(
-        geoRestauracao,
-        {
-            style: estiloRestauracao,
+);
 
-            filter: function(feature) {
+const media =
+n ? total/n : 0;
 
-                if (idFiltro === 0)
-                    return true;
+document.getElementById(
+'n-poligonos'
+).innerHTML=n;
 
-                return Number(feature.properties.ID)
-                    === Number(idFiltro);
-            },
+document.getElementById(
+'area-total'
+).innerHTML=
+total.toFixed(2)+' ha';
 
-            onEachFeature: popupRestauracao
-        }
-    );
+document.getElementById(
+'area-media'
+).innerHTML=
+media.toFixed(2)+' ha';
 
-    camadaRestauracao.addTo(map);
-
-    if (camadaRestauracao.getLayers().length > 0) {
-        map.fitBounds(
-            camadaRestauracao.getBounds(),
-            {
-                padding: [30, 30]
-            }
-        );
-    }
 }
 
-// =====================================================
-// BOTÕES
-// =====================================================
+//================================================
 
-function filtrarMapa(id) {
-    renderizarRestauracao(id);
+function renderRestauracao(idFiltro){
+
+if(restauracaoLayer){
+
+map.removeLayer(
+restauracaoLayer
+);
+
 }
 
-window.filtrarMapa = filtrarMapa;
+restauracaoLayer =
+L.geoJSON(
 
-// =====================================================
-// CARREGAMENTO
-// =====================================================
+restauracaoData,
 
-async function iniciar() {
+{
 
-    try {
+style:estiloRestauracao,
 
-        atualizarStatus("Carregando GeoJSON...");
+filter:f=>{
 
-        const [
-            limiteTI,
-            usoOcupacao,
-            restauracao
-        ] = await Promise.all([
-            carregarGeoJSON(
-                "data/limite_ti.geojson"
-            ),
-            carregarGeoJSON(
-                "data/uso_ocupacao.geojson"
-            ),
-            carregarGeoJSON(
-                "data/areas_restauracao.geojson"
-            )
-        ]);
+if(idFiltro===0)
+return true;
 
-        camadaTI = L.geoJSON(
-            limiteTI,
-            {
-                style: estiloTI
-            }
-        ).addTo(map);
+return Number(
+f.properties.ID
+)===idFiltro;
 
-        camadaUso = L.geoJSON(
-            usoOcupacao,
-            {
-                style: estiloUso
-            }
-        ).addTo(map);
+},
 
-        geoRestauracao = restauracao;
+onEachFeature:
+popupRestauracao
 
-        renderizarRestauracao(0);
-
-        atualizarStatus(
-            "Dados carregados com sucesso."
-        );
-
-    }
-    catch (erro) {
-
-        console.error(erro);
-
-        atualizarStatus(
-            "Erro ao carregar os dados. Verifique F12."
-        );
-
-        alert(
-            "Falha ao carregar GeoJSON.\n\nVeja o Console (F12)."
-        );
-    }
 }
 
-// =====================================================
+).addTo(map);
 
-iniciar();
+if(
+restauracaoLayer.getLayers()
+.length
+){
+
+map.fitBounds(
+
+restauracaoLayer.getBounds(),
+
+{
+padding:[30,30]
+}
+
+);
+
+}
+
+atualizarEstatisticas(
+idFiltro
+);
+
+}
+
+//================================================
+
+async function init(){
+
+try{
+
+const [
+
+limite,
+uso,
+rest
+
+] = await Promise.all([
+
+fetchGeoJSON(
+'data/limite_ti.geojson'
+),
+
+fetchGeoJSON(
+'data/uso_ocupacao.geojson'
+),
+
+fetchGeoJSON(
+'data/areas_restauracao.geojson'
+)
+
+]);
+
+usoData = uso;
+
+restauracaoData = rest;
+
+//--------------------------------
+
+limiteLayer =
+L.geoJSON(
+
+limite,
+
+{
+
+style:{
+
+color:'#ffffff',
+
+weight:2,
+
+fillOpacity:0
+
+}
+
+}
+
+).addTo(map);
+
+//--------------------------------
+
+usoLayer =
+L.geoJSON(
+
+usoData,
+
+{
+
+style:estiloUso
+
+}
+
+).addTo(map);
+
+//--------------------------------
+
+renderRestauracao(0);
+
+//--------------------------------
+
+document
+.getElementById(
+'area-select'
+)
+.addEventListener(
+'change',
+e=>{
+
+renderRestauracao(
+Number(
+e.target.value
+)
+);
+
+}
+);
+
+//--------------------------------
+
+document
+.querySelectorAll(
+'input[data-layer]'
+)
+.forEach(cb=>{
+
+cb.addEventListener(
+'change',
+e=>{
+
+const nome =
+e.target.dataset.layer;
+
+const ativo =
+e.target.checked;
+
+const camada =
+nome==='uso'
+? usoLayer
+: restauracaoLayer;
+
+if(ativo){
+
+camada.addTo(map);
+
+}else{
+
+map.removeLayer(
+camada
+);
+
+}
+
+});
+
+});
+
+}
+catch(err){
+
+console.error(err);
+
+alert(
+'Erro ao carregar GeoJSON. Veja o Console.'
+);
+
+}
+
+}
+
+init();

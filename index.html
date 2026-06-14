@@ -1,54 +1,119 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Geoportal - Áreas de Restauração</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<title>Áreas de Restauração · TI Sete de Setembro</title>
 
-    <link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap"
+rel="stylesheet">
+
+<link rel="stylesheet" href="css/style.css">
+
 </head>
 
 <body>
 
-    <div id="sidebar">
+<div id="app">
 
-        <h1>Geoportal</h1>
+<aside id="panel">
 
-        <p>
-            Áreas de restauração da TI Sete de Setembro
-        </p>
+<div class="panel-head">
 
-        <button class="btn" onclick="filtrarMapa(0)">
-            Mostrar Todas
-        </button>
+<h1>Áreas de Restauração</h1>
 
-        <button class="btn" onclick="filtrarMapa(1)">
-            1 - Metareila
-        </button>
+<p>TI Sete de Setembro</p>
 
-        <button class="btn" onclick="filtrarMapa(2)">
-            2 - Ecoporé
-        </button>
+</div>
 
-        <hr>
+<section class="block">
 
-        <div id="status">
-            Carregando dados...
-        </div>
+<label>Área</label>
 
-    </div>
+<select id="area-select">
 
-    <div id="map"></div>
+<option value="0">
+Todas as áreas
+</option>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<option value="1">
+Metareila
+</option>
 
-    <script src="js/app.js"></script>
+<option value="2">
+Ecoporé
+</option>
+
+</select>
+
+</section>
+
+<section class="block">
+
+<div id="stats">
+
+<div class="stat">
+<span>Polígonos</span>
+<b id="n-poligonos">-</b>
+</div>
+
+<div class="stat">
+<span>Área total</span>
+<b id="area-total">-</b>
+</div>
+
+<div class="stat">
+<span>Área média</span>
+<b id="area-media">-</b>
+</div>
+
+</div>
+
+</section>
+
+<section class="block">
+
+<h3>Camadas</h3>
+
+<label>
+<input type="checkbox"
+data-layer="uso"
+checked>
+
+Uso e ocupação
+</label>
+
+<label>
+<input type="checkbox"
+data-layer="restauracao"
+checked>
+
+Restauração
+</label>
+
+</section>
+
+</aside>
+
+<main id="map-wrap">
+
+<div id="map"></div>
+
+</main>
+
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="js/app.js"></script>
 
 </body>
-
 </html>
