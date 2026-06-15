@@ -361,6 +361,17 @@ body{
 
 }
 
+/* Adicionado: Estilo para a checkbox das Aldeias */
+.swatch.aldeia{
+
+    background:#ffffff;
+
+    border:2px solid var(--c-ink);
+
+    border-radius:50%;
+
+}
+
 /* ==========================================================
    LEGENDA
 ========================================================== */
@@ -387,6 +398,17 @@ body{
     border-radius:3px;
 
     border:1px solid rgba(0,0,0,.2);
+
+}
+
+/* Adicionado: Estilo para a bolinha da legenda das Aldeias */
+.legend-color.aldeia{
+
+    background:#ffffff;
+
+    border:2px solid var(--c-ink);
+
+    border-radius:50%;
 
 }
 
@@ -426,7 +448,7 @@ body{
 }
 
 /* ==========================================================
-   TOOLTIP DAS ÁREAS
+   TOOLTIP DAS ÁREAS E ALDEIAS
 ========================================================== */
 
 .label-restauracao{
@@ -444,6 +466,29 @@ body{
     font-weight:700;
 
     padding:2px 6px;
+
+    border-radius:4px;
+
+    white-space:nowrap;
+
+}
+
+/* Adicionado: Estilo do Rótulo flutuante das Aldeias */
+.label-aldeia{
+
+    background:rgba(36,51,66,.9);
+
+    border:none;
+
+    box-shadow:0 2px 8px rgba(0,0,0,.2);
+
+    color:#ffffff;
+
+    font-size:11px;
+
+    font-weight:700;
+
+    padding:3px 8px;
 
     border-radius:4px;
 

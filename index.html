@@ -10,11 +10,9 @@
 <meta name="description"
 content="Geoportal de áreas prioritárias para restauração ecológica na Terra Indígena Sete de Setembro.">
 
-<!-- Leaflet -->
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
-<!-- Google Fonts -->
 <link rel="preconnect"
 href="https://fonts.googleapis.com">
 
@@ -25,7 +23,6 @@ crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
 rel="stylesheet">
 
-<!-- CSS -->
 <link rel="stylesheet"
 href="css/style.css">
 
@@ -34,10 +31,6 @@ href="css/style.css">
 <body>
 
 <div id="app">
-
-    <!-- ===================================================== -->
-    <!-- PAINEL LATERAL -->
-    <!-- ===================================================== -->
 
     <aside id="panel">
 
@@ -62,10 +55,6 @@ href="css/style.css">
             </div>
 
         </header>
-
-        <!-- ===================================== -->
-        <!-- FILTRO -->
-        <!-- ===================================== -->
 
         <section class="block">
 
@@ -102,10 +91,6 @@ href="css/style.css">
             </div>
 
         </section>
-
-        <!-- ===================================== -->
-        <!-- ESTATÍSTICAS -->
-        <!-- ===================================== -->
 
         <section class="block">
 
@@ -166,10 +151,6 @@ href="css/style.css">
             </div>
 
         </section>
-
-        <!-- ===================================== -->
-        <!-- CAMADAS -->
-        <!-- ===================================== -->
 
         <section class="block">
 
@@ -235,6 +216,30 @@ href="css/style.css">
 
                         <input
                             type="checkbox"
+                            data-layer="aldeias"
+                            checked>
+
+                        <span
+                            class="swatch aldeia">
+                        </span>
+
+                        <span
+                            class="toggle-label">
+
+                            Aldeias
+
+                        </span>
+
+                    </label>
+
+                </li>
+
+                <li>
+
+                    <label class="toggle">
+
+                        <input
+                            type="checkbox"
                             data-layer="limite"
                             checked>
 
@@ -257,10 +262,6 @@ href="css/style.css">
 
         </section>
 
-        <!-- ===================================== -->
-        <!-- LEGENDA -->
-        <!-- ===================================== -->
-
         <section class="block">
 
             <h3 class="block-title">
@@ -271,15 +272,9 @@ href="css/style.css">
 
             <div id="legend-container">
 
-                <!-- preenchido pelo JS -->
-
-            </div>
+                </div>
 
         </section>
-
-        <!-- ===================================== -->
-        <!-- RODAPÉ -->
-        <!-- ===================================== -->
 
         <footer class="panel-foot">
 
@@ -304,10 +299,6 @@ href="css/style.css">
 
     </aside>
 
-    <!-- ===================================================== -->
-    <!-- MAPA -->
-    <!-- ===================================================== -->
-
     <main id="map-wrap">
 
         <div id="map"></div>
@@ -326,10 +317,6 @@ href="css/style.css">
     </main>
 
 </div>
-
-<!-- ===================================================== -->
-<!-- BIBLIOTECAS -->
-<!-- ===================================================== -->
 
 <script
 src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">

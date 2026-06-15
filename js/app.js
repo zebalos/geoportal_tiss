@@ -1,6 +1,8 @@
 /* ==========================================================
    GEOPORTAL RESTAURAÇÃO
    TI SETE DE SETEMBRO
+   APP.JS REFATORADO
+   PARTE 1/2
 ========================================================== */
 
 const CFG = {
@@ -30,13 +32,15 @@ const CFG = {
 
 let map;
 
+let limiteData;
+let usoData;
+let restauracaoData;
+let aldeiasData;
+
 let limiteLayer;
 let usoLayer;
 let restauracaoLayer;
-
-let usoData;
-let restauracaoData;
-let limiteData;
+let aldeiasLayer;
 
 /* ==========================================================
    MAPA
@@ -46,11 +50,14 @@ function criarMapa(){
 
     map = L.map('map', {
 
-        zoomControl:true
+        zoomControl : true
 
     });
 
-    map.setView([-11.0,-61.4],8);
+    map.setView(
+        [-11.0, -61.4],
+        8
+    );
 
     L.tileLayer(
 
@@ -58,8 +65,8 @@ function criarMapa(){
 
         {
 
-            subdomains:['0','1','2','3'],
-            maxZoom:20
+            subdomains : ['0','1','2','3'],
+            maxZoom : 20
 
         }
 
@@ -68,14 +75,15 @@ function criarMapa(){
 }
 
 /* ==========================================================
-   FETCH
+   CARREGAMENTO
 ========================================================== */
 
 async function fetchGeoJSON(url){
 
-    const r = await fetch(url);
+    const response =
+        await fetch(url);
 
-    if(!r.ok){
+    if(!response.ok){
 
         throw new Error(
             `Erro carregando ${url}`
@@ -83,18 +91,50 @@ async function fetchGeoJSON(url){
 
     }
 
-    return await r.json();
+    return await response.json();
+
+}
+
+async function carregarDados(){
+
+    const dados =
+        await Promise.all([
+
+            fetchGeoJSON(
+                'data/limite_ti.geojson'
+            ),
+
+            fetchGeoJSON(
+                'data/uso_ocupacao.geojson'
+            ),
+
+            fetchGeoJSON(
+                'data/areas_restauracao.geojson'
+            ),
+
+            fetchGeoJSON(
+                'data/aldeias.geojson'
+            )
+
+        ]);
+
+    limiteData       = dados[0];
+    usoData          = dados[1];
+    restauracaoData  = dados[2];
+    aldeiasData      = dados[3];
 
 }
 
 /* ==========================================================
-   CORES DE USO
+   CORES
 ========================================================== */
 
 function getCorUso(tipo){
 
-    return CFG.classesUso[tipo]
-        || '#9e9e9e';
+    return (
+        CFG.classesUso[tipo]
+        || '#9e9e9e'
+    );
 
 }
 
@@ -102,22 +142,34 @@ function getCorUso(tipo){
    ESTILOS
 ========================================================== */
 
-function estiloUso(feature){
-
-    const cor =
-        getCorUso(
-            feature.properties.Tipo_de_us
-        );
+function estiloLimite(){
 
     return {
 
-        color:cor,
+        color : '#ffffff',
+        weight : 3,
+        opacity : 1,
+        fillOpacity : 0
 
-        weight:1,
+    };
 
-        fillColor:cor,
+}
 
-        fillOpacity:0.45
+function estiloUso(feature){
+
+    const cor = getCorUso(
+
+        feature.properties.Tipo_de_us
+
+    );
+
+    return {
+
+        color : cor,
+        weight : 1,
+
+        fillColor : cor,
+        fillOpacity : 0.45
 
     };
 
@@ -126,7 +178,9 @@ function estiloUso(feature){
 function estiloRestauracao(feature){
 
     const id =
-        Number(feature.properties.ID);
+        Number(
+            feature.properties.ID
+        );
 
     let cor =
         CFG.metareila;
@@ -140,27 +194,11 @@ function estiloRestauracao(feature){
 
     return {
 
-        color:cor,
+        color : cor,
+        weight : 2,
 
-        weight:2,
-
-        fillColor:cor,
-
-        fillOpacity:0.35
-
-    };
-
-}
-
-function estiloLimite(){
-
-    return {
-
-        color:'#ffffff',
-
-        weight:3,
-
-        fillOpacity:0
+        fillColor : cor,
+        fillOpacity : 0.30
 
     };
 
@@ -186,7 +224,9 @@ function popupRestauracao(feature, layer){
             <hr>
 
             <b>Área:</b>
-            ${Number(p.HA || 0).toFixed(2)} ha
+            ${Number(
+                p.HA || 0
+            ).toFixed(2)} ha
 
             <br>
 
@@ -197,7 +237,7 @@ function popupRestauracao(feature, layer){
 
             <b>Tipo:</b>
             ${p.Tipo_de_us || '-'}
-              
+
         </div>
 
     `);
@@ -208,11 +248,50 @@ function popupRestauracao(feature, layer){
 
         {
 
-            permanent:true,
+            permanent : true,
 
-            direction:'center',
+            direction : 'center',
 
-            className:'label-restauracao'
+            className :
+                'label-restauracao'
+
+        }
+
+    );
+
+}
+
+function popupAldeia(feature, layer){
+
+    const nome =
+
+        feature.properties.Name ||
+        'Aldeia';
+
+    layer.bindPopup(`
+
+        <div class="popup-content">
+
+            <h3>${nome}</h3>
+
+        </div>
+
+    `);
+
+    layer.bindTooltip(
+
+        nome,
+
+        {
+
+            permanent : true,
+
+            direction : 'top',
+
+            offset : [0,-10],
+
+            className :
+                'label-aldeia'
 
         }
 
@@ -242,13 +321,13 @@ function atualizarEstatisticas(idFiltro){
 
     }
 
-    const n =
+    const nPoligonos =
         feats.length;
 
     const areaTotal =
         feats.reduce(
 
-            (acc,f) =>
+            (acc, f) =>
 
                 acc +
                 Number(
@@ -260,25 +339,26 @@ function atualizarEstatisticas(idFiltro){
         );
 
     const areaMedia =
-        n > 0
-            ? areaTotal / n
-            : 0;
+
+        nPoligonos > 0
+
+        ? areaTotal / nPoligonos
+
+        : 0;
 
     document.getElementById(
         'n-poligonos'
-    ).innerHTML = n;
+    ).innerHTML = nPoligonos;
 
     document.getElementById(
         'area-total'
     ).innerHTML =
-        areaTotal.toFixed(2) +
-        ' ha';
+        areaTotal.toFixed(2) + ' ha';
 
     document.getElementById(
         'area-media'
     ).innerHTML =
-        areaMedia.toFixed(2) +
-        ' ha';
+        areaMedia.toFixed(2) + ' ha';
 
 }
 
@@ -291,43 +371,41 @@ function gerarLegendaHTML(){
     let html = '';
 
     html += `
-
         <div class="legend-item">
-
             <span
                 class="legend-color"
                 style="background:${CFG.metareila}">
             </span>
-
             Metareila
-
         </div>
-
     `;
 
     html += `
-
         <div class="legend-item">
-
             <span
                 class="legend-color"
                 style="background:${CFG.ecopore}">
             </span>
-
             Ecoporé
-
         </div>
+    `;
 
+    html += `
+        <div class="legend-item">
+            <span
+                class="legend-color aldeia">
+            </span>
+            Aldeias
+        </div>
     `;
 
     html += '<hr>';
 
     Object.entries(
         CFG.classesUso
-    ).forEach(([classe,cor])=>{
+    ).forEach(([classe,cor]) => {
 
         html += `
-
             <div class="legend-item">
 
                 <span
@@ -338,7 +416,6 @@ function gerarLegendaHTML(){
                 ${classe}
 
             </div>
-
         `;
 
     });
@@ -350,10 +427,50 @@ function gerarLegendaHTML(){
 }
 
 /* ==========================================================
-   RESTAURAÇÃO
+   CAMADAS
 ========================================================== */
 
-function renderRestauracao(idFiltro){
+function criarLimite(){
+
+    limiteLayer =
+        L.geoJSON(
+
+            limiteData,
+
+            {
+
+                style:
+                    estiloLimite
+
+            }
+
+        );
+
+    limiteLayer.addTo(map);
+
+}
+
+function criarUso(){
+
+    usoLayer =
+        L.geoJSON(
+
+            usoData,
+
+            {
+
+                style:
+                    estiloUso
+
+            }
+
+        );
+
+    usoLayer.addTo(map);
+
+}
+
+function criarRestauracao(idFiltro = 0){
 
     if(restauracaoLayer){
 
@@ -373,17 +490,22 @@ function renderRestauracao(idFiltro){
                 style:
                     estiloRestauracao,
 
-                filter:f => {
+                filter:
+                function(feature){
 
-                    if(idFiltro===0){
+                    if(idFiltro === 0){
 
                         return true;
 
                     }
 
-                    return Number(
-                        f.properties.ID
-                    ) === idFiltro;
+                    return (
+
+                        Number(
+                            feature.properties.ID
+                        ) === idFiltro
+
+                    );
 
                 },
 
@@ -396,16 +518,77 @@ function renderRestauracao(idFiltro){
 
     restauracaoLayer.addTo(map);
 
-    if(
+    atualizarEstatisticas(
+        idFiltro
+    );
+
+}
+
+function criarAldeias(){
+
+    aldeiasLayer =
+        L.geoJSON(
+
+            aldeiasData,
+
+            {
+
+                pointToLayer:
+                function(feature, latlng){
+
+                    return L.circleMarker(
+
+                        latlng,
+
+                        {
+
+                            radius : 5,
+
+                            color : '#243342',
+
+                            weight : 2,
+
+                            fillColor : '#ffffff',
+
+                            fillOpacity : 1
+
+                        }
+
+                    );
+
+                },
+
+                onEachFeature:
+                    popupAldeia
+
+            }
+
+        );
+
+    aldeiasLayer.addTo(map);
+
+}
+
+/* ==========================================================
+   ENQUADRAMENTO
+========================================================== */
+
+function zoomInicial(){
+
+    const grupo = L.featureGroup([
+
+        limiteLayer,
         restauracaoLayer
-        .getLayers()
-        .length
+
+    ]);
+
+    if(
+        grupo.getLayers().length
     ){
 
         map.fitBounds(
 
-            restauracaoLayer
-            .getBounds(),
+            grupo.getBounds(),
 
             {
 
@@ -417,73 +600,6 @@ function renderRestauracao(idFiltro){
 
     }
 
-    atualizarEstatisticas(
-        idFiltro
-    );
-
-}
-
-/* ==========================================================
-   CAMADAS
-========================================================== */
-
-function configurarCamadas(){
-
-    document
-    .querySelectorAll(
-        'input[data-layer]'
-    )
-    .forEach(cb=>{
-
-        cb.addEventListener(
-            'change',
-            e=>{
-
-                const nome =
-                    e.target.dataset.layer;
-
-                const ativo =
-                    e.target.checked;
-
-                let camada;
-
-                if(nome==='uso'){
-
-                    camada = usoLayer;
-
-                }
-                else if(
-                    nome==='restauracao'
-                ){
-
-                    camada =
-                        restauracaoLayer;
-
-                }
-                else{
-
-                    camada =
-                        limiteLayer;
-
-                }
-
-                if(ativo){
-
-                    camada.addTo(map);
-
-                }else{
-
-                    map.removeLayer(
-                        camada
-                    );
-
-                }
-
-            }
-        );
-
-    });
-
 }
 
 /* ==========================================================
@@ -492,22 +608,33 @@ function configurarCamadas(){
 
 function configurarFiltro(){
 
-    document
-    .getElementById(
-        'area-select'
-    )
-    .addEventListener(
+    const seletor =
+
+        document.getElementById(
+            'area-select'
+        );
+
+    if(!seletor){
+
+        return;
+
+    }
+
+    seletor.addEventListener(
 
         'change',
 
-        e=>{
+        function(e){
 
-            const id =
+            const idFiltro =
+
                 Number(
                     e.target.value
                 );
 
-            renderRestauracao(id);
+            criarRestauracao(
+                idFiltro
+            );
 
         }
 
@@ -516,7 +643,142 @@ function configurarFiltro(){
 }
 
 /* ==========================================================
-   INIT
+   CONTROLE DE CAMADAS
+========================================================== */
+
+function configurarCamadas(){
+
+    const controles =
+
+        document.querySelectorAll(
+            'input[data-layer]'
+        );
+
+    controles.forEach(
+
+        function(checkbox){
+
+            checkbox.addEventListener(
+
+                'change',
+
+                function(e){
+
+                    const nome =
+
+                        e.target.dataset.layer;
+
+                    const ativo =
+
+                        e.target.checked;
+
+                    let layer = null;
+
+                    if(nome === 'uso'){
+
+                        layer =
+                            usoLayer;
+
+                    }
+                    else if(
+                        nome === 'restauracao'
+                    ){
+
+                        layer =
+                            restauracaoLayer;
+
+                    }
+                    else if(
+                        nome === 'aldeias'
+                    ){
+
+                        layer =
+                            aldeiasLayer;
+
+                    }
+                    else if(
+                        nome === 'limite'
+                    ){
+
+                        layer =
+                            limiteLayer;
+
+                    }
+
+                    if(!layer){
+
+                        return;
+
+                    }
+
+                    if(ativo){
+
+                        layer.addTo(map);
+
+                    }
+                    else{
+
+                        map.removeLayer(
+                            layer
+                        );
+
+                    }
+
+                }
+
+            );
+
+        }
+
+    );
+
+}
+
+/* ==========================================================
+   PAINEL MOBILE
+========================================================== */
+
+function configurarPainel(){
+
+    const botao =
+
+        document.getElementById(
+            'panel-toggle'
+        );
+
+    const painel =
+
+        document.getElementById(
+            'panel'
+        );
+
+    if(
+        !botao ||
+        !painel
+    ){
+
+        return;
+
+    }
+
+    botao.addEventListener(
+
+        'click',
+
+        function(){
+
+            painel.classList.toggle(
+                'hidden'
+            );
+
+        }
+
+    );
+
+}
+
+/* ==========================================================
+   INICIALIZAÇÃO
 ========================================================== */
 
 async function init(){
@@ -525,67 +787,29 @@ async function init(){
 
         criarMapa();
 
-        const dados =
-            await Promise.all([
+        await carregarDados();
 
-                fetchGeoJSON(
-                    'data/limite_ti.geojson'
-                ),
+        criarLimite();
 
-                fetchGeoJSON(
-                    'data/uso_ocupacao.geojson'
-                ),
+        criarUso();
 
-                fetchGeoJSON(
-                    'data/areas_restauracao.geojson'
-                )
+        criarRestauracao();
 
-            ]);
+        criarAldeias();
 
-        limiteData =
-            dados[0];
-
-        usoData =
-            dados[1];
-
-        restauracaoData =
-            dados[2];
-
-        limiteLayer =
-            L.geoJSON(
-
-                limiteData,
-
-                {
-
-                    style:
-                        estiloLimite
-
-                }
-
-            ).addTo(map);
-
-        usoLayer =
-            L.geoJSON(
-
-                usoData,
-
-                {
-
-                    style:
-                        estiloUso
-
-                }
-
-            ).addTo(map);
-
-        renderRestauracao(0);
+        zoomInicial();
 
         configurarFiltro();
 
         configurarCamadas();
 
+        configurarPainel();
+
         gerarLegendaHTML();
+
+        console.log(
+            'Geoportal carregado com sucesso.'
+        );
 
     }
     catch(err){
@@ -593,11 +817,17 @@ async function init(){
         console.error(err);
 
         alert(
-            'Erro ao carregar os dados do Geoportal.'
+            'Erro ao carregar o Geoportal.'
         );
 
     }
 
 }
 
-init();
+document.addEventListener(
+
+    'DOMContentLoaded',
+
+    init
+
+);
