@@ -197,9 +197,7 @@ function popupRestauracao(feature, layer){
 
             <b>Tipo:</b>
             ${p.Tipo_de_us || '-'}
-
-            <br>
-       
+              
         </div>
 
     `);
