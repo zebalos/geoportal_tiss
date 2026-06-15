@@ -199,10 +199,7 @@ function popupRestauracao(feature, layer){
             ${p.Tipo_de_us || '-'}
 
             <br>
-
-            <b>Fator de degradação:</b>
-            ${p.Fator_degrad || '-'}
-
+       
         </div>
 
     `);
