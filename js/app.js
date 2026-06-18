@@ -42,7 +42,7 @@ let restauracaoLayer;
 let aldeiasLayer;
 
 /* ==========================================================
-   MAPA
+   MAPA E FERRAMENTAS
 ========================================================== */
 
 function criarMapa(){
@@ -70,6 +70,20 @@ function criarMapa(){
         }
 
     ).addTo(map);
+
+    // INICIALIZA A FERRAMENTA DE MEDIÇÃO
+    if(typeof L.Control.Measure !== 'undefined'){
+        const measureControl = new L.Control.Measure({
+            position: 'topright',
+            primaryLengthUnit: 'meters',
+            secondaryLengthUnit: 'kilometers',
+            primaryAreaUnit: 'hectares',
+            secondaryAreaUnit: 'sqmeters',
+            activeColor: CFG.metareila,
+            completedColor: CFG.ecopore
+        });
+        measureControl.addTo(map);
+    }
 
 }
 
@@ -209,8 +223,16 @@ function estiloRestauracao(feature){
 
 function popupUso(feature, layer){
 
-    const p =
-        feature.properties;
+    const p = feature.properties;
+    
+    // CÁLCULO DINÂMICO DE ÁREA COM TURF.JS (Metros Quadrados para Hectares)
+    let areaHectares = 0;
+    try {
+        const areaMetrosQuad = turf.area(feature);
+        areaHectares = areaMetrosQuad / 10000;
+    } catch (e) {
+        console.warn("Erro ao calcular a área:", e);
+    }
 
     layer.bindPopup(`
 
@@ -224,6 +246,11 @@ function popupUso(feature, layer){
 
             <b>Tipo:</b>
             ${p.Tipo_de_us || '-'}
+            
+            <br>
+            
+            <b>Área:</b>
+            ${areaHectares.toFixed(2)} ha
 
         </div>
 
@@ -250,8 +277,15 @@ function popupUso(feature, layer){
 
 function popupRestauracao(feature, layer){
 
-    const p =
-        feature.properties;
+    const p = feature.properties;
+    
+    // Como garantia, também podemos calcular dinamicamente se p.HA estiver ausente
+    let areaHectares = Number(p.HA || 0);
+    if(areaHectares === 0){
+        try {
+            areaHectares = turf.area(feature) / 10000;
+        } catch(e) {}
+    }
 
     layer.bindPopup(`
 
@@ -264,9 +298,7 @@ function popupRestauracao(feature, layer){
             <hr>
 
             <b>Área:</b>
-            ${Number(
-                p.HA || 0
-            ).toFixed(2)} ha
+            ${areaHectares.toFixed(2)} ha
 
             <br>
 
