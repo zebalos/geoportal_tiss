@@ -2,7 +2,6 @@
    GEOPORTAL RESTAURAÇÃO
    TI SETE DE SETEMBRO
    APP.JS REFATORADO
-   PARTE 1/2
 ========================================================== */
 
 const CFG = {
@@ -207,6 +206,47 @@ function estiloRestauracao(feature){
 /* ==========================================================
    POPUPS
 ========================================================== */
+
+function popupUso(feature, layer){
+
+    const p =
+        feature.properties;
+
+    layer.bindPopup(`
+
+        <div class="popup-content">
+
+            <h3>
+                ${p.Nome || 'Sem nome'}
+            </h3>
+
+            <hr>
+
+            <b>Tipo:</b>
+            ${p.Tipo_de_us || '-'}
+
+        </div>
+
+    `);
+
+    layer.bindTooltip(
+
+        p.Nome || '',
+
+        {
+
+            permanent : true,
+
+            direction : 'center',
+
+            className :
+                'label-uso'
+
+        }
+
+    );
+
+}
 
 function popupRestauracao(feature, layer){
 
@@ -460,7 +500,10 @@ function criarUso(){
             {
 
                 style:
-                    estiloUso
+                    estiloUso,
+                    
+                onEachFeature:
+                    popupUso
 
             }
 

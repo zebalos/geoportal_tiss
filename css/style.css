@@ -361,7 +361,6 @@ body{
 
 }
 
-/* Adicionado: Estilo para a checkbox das Aldeias */
 .swatch.aldeia{
 
     background:#ffffff;
@@ -401,7 +400,6 @@ body{
 
 }
 
-/* Adicionado: Estilo para a bolinha da legenda das Aldeias */
 .legend-color.aldeia{
 
     background:#ffffff;
@@ -448,10 +446,11 @@ body{
 }
 
 /* ==========================================================
-   TOOLTIP DAS ÁREAS E ALDEIAS
+   TOOLTIP DAS ÁREAS E ALDEIAS E USO
 ========================================================== */
 
-.label-restauracao{
+.label-restauracao,
+.label-uso {
 
     background:rgba(255,255,255,.85);
 
@@ -473,7 +472,6 @@ body{
 
 }
 
-/* Adicionado: Estilo do Rótulo flutuante das Aldeias */
 .label-aldeia{
 
     background:rgba(36,51,66,.9);
